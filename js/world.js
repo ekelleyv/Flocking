@@ -12,6 +12,8 @@ World.prototype.init = function() {
 	this.scene = this.init_scene();
 
 	this.camera = this.init_camera();
+	this.camera_rotation = Math.PI/180*90;
+	this.camera_radius = 30;
 
 	this.lights = this.init_lights();
 
@@ -19,13 +21,14 @@ World.prototype.init = function() {
 
 	this.flock = new Flock(this.scene, 100);
 
-	this.ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshLambertMaterial({color: 0x0000DD}));
+	this.last_time = new Date();
+
+	this.elapsed_time = 0;
+
+	this.ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 300, 1000, 100), new THREE.MeshLambertMaterial({color: 0x0000DD, wireframe: true}));
 	this.ground.rotation.set(-90*Math.PI/180, 0, 0);
 	this.ground.position.set(0, -10, 0);
-	console.log(this.ground);
 	this.scene.add(this.ground);
-
-	console.log("init");
 
 	requestAnimationFrame(this.render.bind(this));
 
@@ -58,8 +61,14 @@ World.prototype.init_stats = function() {
 	this.render_stats.domElement.style.top = '1px';
 	this.render_stats.domElement.style.zIndex = 100;
 
-	this.render_stats.domElement.hidden = true;
+	this.render_stats.domElement.hidden = false;
 	document.body.appendChild(this.render_stats.domElement);
+};
+
+World.prototype.update_time = function() {
+	var now = new Date();
+	this.elapsed_time = now - this.last_time;
+	this.last_time = now;
 };
 
 World.prototype.init_scene = function() {
@@ -80,7 +89,7 @@ World.prototype.init_camera = function() {
                                 ASPECT,
                                 NEAR,
                                 FAR  );
-	camera.position.set( 0, 10, 20);
+	camera.position.set( 0, 30, 0);
 	camera.lookAt(new THREE.Vector3(0, 0, 0) );
 	camera.h_rotation = 0;
 
@@ -123,16 +132,41 @@ World.prototype.handle_keys = function() {
 	if (this.keyboard.pressed("1")) {
 		this.render_stats.domElement.hidden = false;
 	}
+	if (this.keyboard.pressed("a")) {
+		this.camera_rotation += .05;
+	}
+	if (this.keyboard.pressed("d")) {
+		this.camera_rotation -= .05;
+	}
+	if (this.keyboard.pressed("w")) {
+		this.camera_radius -= .5;
+	}
+	if (this.keyboard.pressed("s")) {
+		this.camera_radius += .5;
+	}
+
+};
+
+World.prototype.update_camera = function() {
+	
+	this.camera.position.x = this.flock.center.x + this.camera_radius*Math.cos(this.camera_rotation);
+	this.camera.position.y = this.flock.center.y;
+	this.camera.position.z = this.flock.center.z + this.camera_radius*Math.sin(this.camera_rotation);
+
+	this.camera.lookAt(this.flock.center);
 };
 
 
 World.prototype.render = function() {
+	this.update_time();
 	this.handle_keys();
-	this.flock.update();	
+	// 	this.update_camera();
+	this.flock.update(this.elapsed_time);	
 	this.renderer.render( this.scene, this.camera );
 	this.render_stats.update();
 	requestAnimationFrame( this.render.bind(this) );
 };
+
 
 var world = new World();
 window.addEventListener("load", world.init.bind(world));

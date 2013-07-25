@@ -1,8 +1,9 @@
 //Based on http://www.kfish.org/boids/pseudocode.html
 
-var Flock = function(scene, flock_size) {
+var Flock = function(scene, octree, flock_size) {
 	this.flock_size = flock_size;
 	this.scene = scene;
+	this.octree = octree;
 	this.center;
 	this.avg_vel;
 	this.birds = this.init_flock();
@@ -19,6 +20,7 @@ Flock.prototype.init_flock = function() {
 		birds.push(bird);
 		this.scene.add(bird.mesh);
 		this.scene.add(bird.line);
+		this.scene.add(bird.sphere);
 	}
 	return birds;
 };
@@ -29,12 +31,15 @@ Flock.prototype.update = function(elapsed_time) {
 		var bird = this.birds[i];
 		var v1, v2, v3;
 
-		v1 = this.rule1(i);
-		v2 = this.rule2(i);
-		v3 = this.rule3(i);
+		v1 = this.cohesion(i);
+		v2 = this.separation(i);
+		v3 = this.alignment(i);
 
-		var v = v1.add(v2);
-		bird.update(elapsed_time, v, this.center);
+		bird.apply_force(v1);
+		bird.apply_force(v2);
+		bird.apply_force(v3);
+
+		bird.update(elapsed_time, this.center);
 	}
 };
 
@@ -54,7 +59,7 @@ Flock.prototype.update_center = function() {
 	this.avg_vel = avg_vel;
 };
 
-Flock.prototype.rule1 = function(bird_index) {
+Flock.prototype.cohesion = function(bird_index) {
 	var other_birds = this.flock_size - 1;
 	var center = new THREE.Vector3(0, 0, 0);
 	var bird = this.birds[bird_index];
@@ -68,12 +73,12 @@ Flock.prototype.rule1 = function(bird_index) {
 	center = center.divideScalar(other_birds);
 
 	var v1 = center.sub(bird.mesh.position);
-	v1.divideScalar(500);
+	v1.divideScalar(100);
 
 	return v1;
 };
 
-Flock.prototype.rule2 = function(bird_index) {
+Flock.prototype.separation = function(bird_index) {
 	var bird = this.birds[bird_index];
 	var v2 = new THREE.Vector3(0, 0, 0);
 
@@ -84,18 +89,16 @@ Flock.prototype.rule2 = function(bird_index) {
 
 		var dist = bird.mesh.position.distanceTo(current_bird.mesh.position);
 
-		if (dist < 1) {
+		if (dist < 3) {
 			var offset = new THREE.Vector3(0, 0, 0);
 			offset.subVectors(current_bird.mesh.position, bird.mesh.position);
 			v2 = v2.sub(offset);
 		}
 	}
-
-	v2.divideScalar(10);
 	return v2;
 };
 
-Flock.prototype.rule3 = function(bird_index) {
+Flock.prototype.alignment = function(bird_index) {
 	var bird = this.birds[bird_index];
 	var v3 = new THREE.Vector3(0, 0, 0);
 

@@ -19,16 +19,24 @@ World.prototype.init = function() {
 
 	this.keyboard = new THREEx.KeyboardState();
 
-	this.flock = new Flock(this.scene, 100);
+	this.flock = new Flock(this.scene, this.octree, 100);
 
 	this.last_time = new Date();
 
 	this.elapsed_time = 0;
 
-	this.ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 300, 1000, 100), new THREE.MeshLambertMaterial({color: 0x0000DD, wireframe: true}));
+	this.ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500, 500, 500), new THREE.MeshLambertMaterial({color: 0x0000DD, wireframe: false}));
 	this.ground.rotation.set(-90*Math.PI/180, 0, 0);
 	this.ground.position.set(0, -10, 0);
 	this.scene.add(this.ground);
+
+	this.octree = new THREE.Octree({
+	    radius: 1, // optional, default = 1, octree will grow and shrink as needed
+	    depthMax: -1, // optional, default = -1, infinite depth
+	    objectsThreshold: 8, // optional, default = 8
+	    overlapPct: 0.15, // optional, default = 0.15 (15%), this helps sort objects that overlap nodes
+	    scene: this.scene // optional, pass scene as parameter only if you wish to visualize octree
+	} );
 
 	requestAnimationFrame(this.render.bind(this));
 
@@ -89,7 +97,7 @@ World.prototype.init_camera = function() {
                                 ASPECT,
                                 NEAR,
                                 FAR  );
-	camera.position.set( 0, 30, 0);
+	camera.position.set( 0, 50, 0);
 	camera.lookAt(new THREE.Vector3(0, 0, 0) );
 	camera.h_rotation = 0;
 
@@ -149,10 +157,12 @@ World.prototype.handle_keys = function() {
 
 World.prototype.update_camera = function() {
 	
-	this.camera.position.x = this.flock.center.x + this.camera_radius*Math.cos(this.camera_rotation);
-	this.camera.position.y = this.flock.center.y;
-	this.camera.position.z = this.flock.center.z + this.camera_radius*Math.sin(this.camera_rotation);
+	// this.camera.position.x = this.flock.center.x + this.camera_radius*Math.cos(this.camera_rotation);
+	// this.camera.position.y = this.flock.center.y;
+	// this.camera.position.z = this.flock.center.z + this.camera_radius*Math.sin(this.camera_rotation);
 
+	this.camera.position.x = this.flock.center.x;
+	this.camera.position.z = this.flock.center.z;
 	this.camera.lookAt(this.flock.center);
 };
 
@@ -160,7 +170,7 @@ World.prototype.update_camera = function() {
 World.prototype.render = function() {
 	this.update_time();
 	this.handle_keys();
-	// 	this.update_camera();
+	this.update_camera();
 	this.flock.update(this.elapsed_time);	
 	this.renderer.render( this.scene, this.camera );
 	this.render_stats.update();

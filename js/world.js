@@ -13,7 +13,7 @@ World.prototype.init = function() {
 
 	this.camera = this.init_camera();
 	this.camera_rotation = Math.PI/180*90;
-	this.camera_radius = 30;
+	this.camera_radius = 50;
 
 	this.lights = this.init_lights();
 
@@ -27,7 +27,9 @@ World.prototype.init = function() {
 	    // scene: this.scene // optional, pass scene as parameter only if you wish to visualize octree
 	} );
 
-	this.flock = new Flock(this.scene, this.octree, 150);
+	this.obstacles;
+
+	this.flock = new Flock(this.scene, this.octree, this.obstacles, 150);
 
 	this.last_time = new Date();
 
@@ -157,20 +159,20 @@ World.prototype.handle_keys = function() {
 
 World.prototype.update_camera = function() {
 	
-	// this.camera.position.x = this.flock.center.x + this.camera_radius*Math.cos(this.camera_rotation);
-	// this.camera.position.y = this.flock.center.y;
-	// this.camera.position.z = this.flock.center.z + this.camera_radius*Math.sin(this.camera_rotation);
+	this.camera.position.x = this.camera_radius*Math.cos(Math.PI/8);
+	this.camera.position.y = this.camera_radius*Math.sin(Math.PI/8);
+	// this.camera.position.z = this.flock.center.z;
 
-	this.camera.position.x = this.flock.center.x;
-	this.camera.position.z = this.flock.center.z;
-	this.camera.lookAt(this.flock.center);
+	// this.camera.position.x = this.flock.center.x;
+	// this.camera.position.z = this.flock.center.z;
+	this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 };
 
 
 World.prototype.render = function() {
 	this.update_time();
 	this.handle_keys();
-	// this.update_camera();
+	this.update_camera();
 	this.flock.update(this.elapsed_time);	
 	this.renderer.render( this.scene, this.camera );
 	this.render_stats.update();

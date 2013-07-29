@@ -1,6 +1,7 @@
-var Bird = function(scene, octree, velocity_hash, position, orientation) {
+var Bird = function(scene, octree, obstacles, velocity_hash, position, orientation) {
 	this.scene = scene;
 	this.octree = octree;
+	this.obstacles = obstacles;
 	this.velocity_hash = velocity_hash;
 	this.line;
 	this.sphere;
@@ -8,23 +9,27 @@ var Bird = function(scene, octree, velocity_hash, position, orientation) {
 	this.init_mesh(position, orientation);
 	this.separation_size = 1;
 	this.acceleration = new THREE.Vector3(0, 0, 0);
-	this.min_speed = 5;
+	this.min_speed = 6;
 	this.max_speed = 10;
 	this.max_delta = .01;
-	this.area_size = 10;
+	this.area_size = 5;
 	this.velocity = new THREE.Vector3(this.min_speed*Math.cos(this.mesh.rotation.y), 0, this.min_speed*Math.sin(this.mesh.rotation.y));
 }
 
 Bird.prototype.init_mesh = function(position, orientation) {
-	var geometry = new THREE.CylinderGeometry(.1, .4, 1, 10, 2);
-	var material = new THREE.MeshLambertMaterial({color: this.get_random_color()});
+	var geometry = new BirdObject();
+	var material =  new THREE.MeshBasicMaterial( { color:Math.random() * 0xffffff, side: THREE.DoubleSide } )
+	geometry.dynamic = true;
 	var mesh = new THREE.Mesh(geometry, material);
+	mesh.phase = Math.floor( Math.random() * 62.83 );
 
 
 	var rot_mat = new THREE.Matrix4();
-	rot_mat.setRotationFromEuler(new THREE.Vector3(0, 0, -Math.PI/2));//rotate on X 90 degrees
-	geometry.applyMatrix(rot_mat);
+	// rot_mat.setRotationFromEuler(new THREE.Vector3(0, 0, -Math.PI/2));//rotate on X 90 degrees
+	// geometry.applyMatrix(rot_mat);
 
+	// mesh.scale = 1;
+	mesh.scale = new THREE.Vector3(.1, .1, .1);
 	mesh.position = position;
 	mesh.rotation = orientation;
 	this.mesh = mesh;
@@ -54,32 +59,6 @@ Bird.prototype.init_mesh = function(position, orientation) {
 
 };
 
-Bird.prototype.update_position = function(elapsed_time, lookAt) {
-	// this.apply_limit(this.acceleration, this.max_delta);
-	this.velocity.add(this.acceleration);
-	this.apply_limit(this.velocity, this.min_speed, this.max_speed);
-
-	var displacement = new THREE.Vector3();
-	displacement.copy(this.velocity);
-	displacement.multiplyScalar(elapsed_time/1000);
-
-	this.mesh.position.add(displacement);
-
-	this.mesh.rotation.y = Math.atan2(-this.velocity.z, this.velocity.x);
-
-
-	// //Drawing lines
-	// this.line.geometry.vertices[0] = this.mesh.position;
-	// this.line.geometry.vertices[1] = lookAt;
-	// this.line.geometry.verticesNeedUpdate = true;
-
-	this.sphere.position = this.mesh.position;
-	this.sphere.rotation = this.mesh.rotation;
-
-	this.acceleration.set(0, 0, 0);
-
-};
-
 Bird.prototype.apply_limit = function(vector, min, max) {
 	if (vector.length() > max) {
 		vector.normalize();
@@ -91,6 +70,7 @@ Bird.prototype.apply_limit = function(vector, min, max) {
 		vector.multiplyScalar(min);
 	}
 
+	vector.y = Math.min(vector.y, 2);
 };
 
 Bird.prototype.update_forces = function() {
@@ -178,7 +158,17 @@ Bird.prototype.bound = function() {
 		v4.x = bounding_force*diff;
 	}
 
-	if (this.mesh.position.z > this.area_size) {
+	if (this.mesh.position.y > this.area_size) {
+		var diff = Math.abs(this.mesh.position.z - this.area_size);
+		v4.y = -.5*diff;
+	}
+
+	if (this.mesh.position.y < 0) {
+		var diff = Math.abs(this.mesh.position.z - this.area_size);
+		v4.y = diff;
+	}
+
+	if (this.mesh.position.z > this.area_size*2) {
 		var diff = Math.abs(this.mesh.position.z - this.area_size);
 		v4.z = -bounding_force*diff;
 	}
@@ -209,4 +199,43 @@ Bird.prototype.get_random_color = function () {
         color += letters[Math.round(Math.random() * 15)];
     }
     return color;
-}
+};
+
+Bird.prototype.update_position = function(elapsed_time, lookAt) {
+	// this.apply_limit(this.acceleration, this.max_delta);
+	this.velocity.add(this.acceleration);
+	this.apply_limit(this.velocity, this.min_speed, this.max_speed);
+
+	var displacement = new THREE.Vector3();
+	displacement.copy(this.velocity);
+	displacement.multiplyScalar(elapsed_time/1000);
+
+	this.mesh.position.add(displacement);
+
+	this.mesh.rotation.z = this.velocity.y*.1;
+	var new_y_rot = Math.atan2(-this.velocity.z, this.velocity.x);
+	var y_rot_diff = new_y_rot - this.mesh.rotation.y;
+	this.mesh.rotation.y = new_y_rot;
+	
+
+	this.mesh.rotation.x = y_rot_diff;
+
+	this.mesh.phase = ( this.mesh.phase + ( Math.max( 0, this.velocity.y) + .1 )  ) % 62.83; 
+
+	// this.mesh.phase = (this.mesh.phase + .3) % 62.83;
+
+	this.mesh.geometry.vertices[ 5 ].y = this.mesh.geometry.vertices[ 4 ].y = Math.sin( this.mesh.phase ) * 5;
+	this.mesh.geometry.verticesNeedUpdate = true;
+
+
+	// //Drawing lines
+	// this.line.geometry.vertices[0] = this.mesh.position;
+	// this.line.geometry.vertices[1] = lookAt;
+	// this.line.geometry.verticesNeedUpdate = true;
+
+	this.sphere.position = this.mesh.position;
+	this.sphere.rotation = this.mesh.rotation;
+
+	this.acceleration.set(0, 0, 0);
+
+};

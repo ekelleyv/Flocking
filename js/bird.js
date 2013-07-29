@@ -8,9 +8,10 @@ var Bird = function(scene, octree, velocity_hash, position, orientation) {
 	this.init_mesh(position, orientation);
 	this.separation_size = 1;
 	this.acceleration = new THREE.Vector3(0, 0, 0);
-	this.min_speed = 1;
+	this.min_speed = 5;
 	this.max_speed = 10;
 	this.max_delta = .01;
+	this.area_size = 10;
 	this.velocity = new THREE.Vector3(this.min_speed*Math.cos(this.mesh.rotation.y), 0, this.min_speed*Math.sin(this.mesh.rotation.y));
 }
 
@@ -98,10 +99,13 @@ Bird.prototype.update_forces = function() {
 	v1 = this.cohesion();
 	v2 = this.separation();
 	v3 = this.alignment();
+	v4 = this.bound();
+	v5 = this.center();
 
 	this.apply_force(v1);
 	this.apply_force(v2);
 	this.apply_force(v3);
+	this.apply_force(v4);
 };
 
 Bird.prototype.cohesion = function() {
@@ -121,7 +125,7 @@ Bird.prototype.cohesion = function() {
 	v1.divideScalar(search.length);
 
 	v1.sub(this.mesh.position);
-	v1.divideScalar(50);
+	v1.divideScalar(300);
 
 	return v1;
 };
@@ -138,7 +142,7 @@ Bird.prototype.separation = function() {
 		offset.subVectors(search[i].object.position, this.mesh.position);
 		v2.sub(offset);
 	}
-	v2.divideScalar(300);
+	v2.divideScalar(200);
 	return v2;
 };
 
@@ -159,7 +163,39 @@ Bird.prototype.alignment = function() {
 
 	v3.sub(this.velocity);
 
-	return v3.divideScalar(100);
+	return v3.divideScalar(15);
+};
+
+Bird.prototype.bound = function() {
+	var v4 = new THREE.Vector3(0, 0, 0);
+	var bounding_force = .05;
+	if (this.mesh.position.x > this.area_size) {
+		var diff = Math.abs(this.mesh.position.x - this.area_size);
+		v4.x = -bounding_force*diff;
+	}
+	if (this.mesh.position.x < -this.area_size) {
+		var diff = Math.abs(this.mesh.position.x - this.area_size);
+		v4.x = bounding_force*diff;
+	}
+
+	if (this.mesh.position.z > this.area_size) {
+		var diff = Math.abs(this.mesh.position.z - this.area_size);
+		v4.z = -bounding_force*diff;
+	}
+	if (this.mesh.position.z < -this.area_size) {
+		var diff = Math.abs(this.mesh.position.z - this.area_size);
+		v4.z = bounding_force*diff;
+	}
+
+	return v4;
+
+};
+
+Bird.prototype.center = function() {
+	var v5 = new THREE.Vector3(0, 0, 0);
+	var center_force = .1;
+
+
 };
 
 Bird.prototype.apply_force = function(force) {

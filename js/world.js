@@ -27,13 +27,13 @@ World.prototype.init = function() {
 	    // scene: this.scene // optional, pass scene as parameter only if you wish to visualize octree
 	} );
 
-	this.flock = new Flock(this.scene, this.octree, 100);
+	this.flock = new Flock(this.scene, this.octree, 150);
 
 	this.last_time = new Date();
 
 	this.elapsed_time = 0;
 
-	this.ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500, 500, 500), new THREE.MeshLambertMaterial({color: 0x0000DD, wireframe: true}));
+	this.ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 50, 50, 50), new THREE.MeshLambertMaterial({color: 0x0000DD, wireframe: true}));
 	this.ground.rotation.set(-90*Math.PI/180, 0, 0);
 	this.ground.position.set(0, -10, 0);
 	this.scene.add(this.ground);
@@ -97,7 +97,7 @@ World.prototype.init_camera = function() {
                                 ASPECT,
                                 NEAR,
                                 FAR  );
-	camera.position.set( 0, 100, 0);
+	camera.position.set( 0, 50, 0);
 	camera.lookAt(new THREE.Vector3(0, 0, 0) );
 	camera.h_rotation = 0;
 

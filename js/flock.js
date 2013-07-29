@@ -27,7 +27,7 @@ Flock.prototype.init_flock = function() {
 Flock.prototype.update = function(elapsed_time) {
 	this.update_center();
 	this.update_velocities();
-	if (this.time_step%10 == 0) {
+	if (this.time_step%5 == 0) {
 		this.octree.update();
 	}
 	for (var i = 0; i < this.flock_size; i++) {

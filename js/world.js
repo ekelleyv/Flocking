@@ -20,7 +20,7 @@ World.prototype.init = function() {
 
 	this.keyboard = new THREEx.KeyboardState();
 
-	this.controls = new THREE.TrackballControls( this.camera );
+	this.controls = new THREE.TrackballControls( this.camera, this.renderer.domElement );
 	this.controls.rotateSpeed = 1.0;
 	this.controls.zoomSpeed = 5;
 	this.controls.panSpeed = 2;
@@ -38,7 +38,7 @@ World.prototype.init = function() {
 	    depthMax: -1, // optional, default = -1, infinite depth
 	    objectsThreshold: 8, // optional, default = 8
 	    overlapPct: 0.15, // optional, default = 0.15 (15%), this helps sort objects that overlap nodes
-	    scene: this.scene // optional, pass scene as parameter only if you wish to visualize octree
+	    scene: null// optional, pass scene as parameter only if you wish to visualize octree
 	} );
 
 	this.obstacles;
@@ -53,6 +53,35 @@ World.prototype.init = function() {
 	this.ground.rotation.set(-90*Math.PI/180, 0, 0);
 	this.ground.position.set(0, -10, 0);
 	this.scene.add(this.ground);
+
+	console.log(this.octree);
+
+	//DAT GUI VARIABLES
+	this.gui = new dat.GUI();
+
+	this.draw_octree = function() {
+		this.octree.scene = this.scene;
+	}
+	var octree_control = this.gui.add(this, 'draw_octree');
+
+	this.separation = 1;
+	this.cohesion = 1;
+	this.alignment = 1;
+	this.min_velocity = 4;
+	this.max_velocity = 10;
+	this.bound_strength = 1;
+
+	this.bc = this.gui.addFolder("Bird Controls");
+	this.bc.add(this, "separation", 0, 3);
+	this.bc.add(this, "cohesion", 0, 3);
+	this.bc.add(this, "alignment", 0, 3);
+	this.bc.add(this, "min_velocity", 0, 5);
+	this.bc.add(this, "max_velocity", 5, 15);
+	this.bc.add(this, "bound_strength", 0, 3);
+
+	
+
+
 
 	requestAnimationFrame(this.render.bind(this));
 

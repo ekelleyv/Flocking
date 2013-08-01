@@ -22,11 +22,11 @@ World.prototype.init = function() {
 
 	this.controls = new THREE.TrackballControls( this.camera, this.renderer.domElement );
 	this.controls.rotateSpeed = 1.0;
-	this.controls.zoomSpeed = 5;
+	this.controls.zoomSpeed = .6;
 	this.controls.panSpeed = 2;
 	this.controls.noZoom = false;
 	this.controls.noPan = false;
-	this.controls.staticMoving = true;
+	this.controls.staticMoving = false;
 	this.controls.dynamicDampingFactor = 0.3;
 	this.controls.target = new THREE.Vector3(0, 0, 0);
 
@@ -67,7 +67,7 @@ World.prototype.init = function() {
 	this.separation = 1;
 	this.cohesion = 1;
 	this.alignment = 1;
-	this.min_velocity = 4;
+	this.min_velocity = 6;
 	this.max_velocity = 10;
 	this.bound_strength = 1;
 	this.max_climb = 1;
@@ -78,8 +78,8 @@ World.prototype.init = function() {
 	this.separation_control = this.bc.add(this, "separation", 0, 3);
 	this.cohesion_control = this.bc.add(this, "cohesion", 0, 3);
 	this.alignment_control = this.bc.add(this, "alignment", 0, 3);
-	this.min_velocity_control = this.bc.add(this, "min_velocity", 0, 5);
-	this.max_velocity_control = this.bc.add(this, "max_velocity", 5, 15);
+	this.min_velocity_control = this.bc.add(this, "min_velocity", 0, 7);
+	this.max_velocity_control = this.bc.add(this, "max_velocity", 8, 15);
 	this.bound_strength_control = this.bc.add(this, "bound_strength", 0, 3);
 	this.max_climb_control = this.bc.add(this, "max_climb", 0, 3);
 	this.bc.open();

@@ -70,17 +70,42 @@ World.prototype.init = function() {
 	this.min_velocity = 4;
 	this.max_velocity = 10;
 	this.bound_strength = 1;
+	this.max_climb = 1;
+
+	console.log(this.gui.addFolder);	
 
 	this.bc = this.gui.addFolder("Bird Controls");
-	this.bc.add(this, "separation", 0, 3);
-	this.bc.add(this, "cohesion", 0, 3);
-	this.bc.add(this, "alignment", 0, 3);
-	this.bc.add(this, "min_velocity", 0, 5);
-	this.bc.add(this, "max_velocity", 5, 15);
-	this.bc.add(this, "bound_strength", 0, 3);
+	this.separation_control = this.bc.add(this, "separation", 0, 3);
+	this.cohesion_control = this.bc.add(this, "cohesion", 0, 3);
+	this.alignment_control = this.bc.add(this, "alignment", 0, 3);
+	this.min_velocity_control = this.bc.add(this, "min_velocity", 0, 5);
+	this.max_velocity_control = this.bc.add(this, "max_velocity", 5, 15);
+	this.bound_strength_control = this.bc.add(this, "bound_strength", 0, 3);
+	this.max_climb_control = this.bc.add(this, "max_climb", 0, 3);
+	this.bc.open();
+	var self = this;
 
-	
-
+	this.separation_control.onFinishChange(function(value) {
+		self.flock.change_separation(value);
+	});
+	this.cohesion_control.onFinishChange(function(value) {
+		self.flock.change_cohesion(value);
+	});
+	this.alignment_control.onFinishChange(function(value) {
+		self.flock.change_alignment(value);
+	});
+	this.min_velocity_control.onFinishChange(function(value) {
+		self.flock.change_min_velocity(value);
+	});
+	this.max_velocity_control.onFinishChange(function(value) {
+		self.flock.change_max_velocity(value);
+	});
+	this.bound_strength_control.onFinishChange(function(value) {
+		self.flock.change_bound_strength(value);
+	});
+	this.max_climb_control.onFinishChange(function(value) {
+		self.flock.change_max_climb(value);
+	});
 
 
 	requestAnimationFrame(this.render.bind(this));

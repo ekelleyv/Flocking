@@ -62,3 +62,47 @@ Flock.prototype.update_center = function() {
 	this.avg_vel = avg_vel;
 };
 
+Flock.prototype.change_separation = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.separation_gain = value;
+	});
+};
+
+Flock.prototype.change_cohesion = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.cohesion_gain = value;
+	});
+};
+
+Flock.prototype.change_alignment = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.alignment_gain = value;
+	});
+};
+
+Flock.prototype.change_min_velocity = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.min_velocity = value;
+	});
+};
+
+Flock.prototype.change_max_velocity = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.max_velocity = value;
+	});
+};
+
+Flock.prototype.change_bound_strength = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.bound_strength = value;
+	});
+};
+
+Flock.prototype.change_max_climb = function(value) {
+	this.birds.forEach(function(bird) {
+		bird.max_climb = value;
+	});
+};
+
+
+

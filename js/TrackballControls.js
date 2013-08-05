@@ -198,6 +198,7 @@ THREE.TrackballControls = function ( object, domElement ) {
   };
 
   this.panCamera = function () {
+    console.log("hello");
 
     var mouseChange = _panEnd.clone().sub( _panStart );
 
